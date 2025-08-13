@@ -8,22 +8,36 @@ using System.Text.Json.Serialization;
 
 DotNetEnv.Env.TraversePath().Load();
 
-var modelId = Environment.GetEnvironmentVariable("MODEL_ID") ?? "gpt-4.1";
+var modelId = Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL_ID") ?? "gpt-5-mini";
 var endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new ArgumentNullException("AZURE_OPENAI_ENDPOINT required");
 var apiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY") ?? throw new ArgumentNullException("AZURE_OPENAI_API_KEY required");
 
+// See AI services supported by semantic kernel:
+//   - https://learn.microsoft.com/en-us/semantic-kernel/get-started/supported-languages?pivots=programming-language-csharp
 var builder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
 
 builder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
 
 // Build the kernel
 Kernel kernel = builder.Build();
+
+// Retrieve the chat completion service registerd above
 var chatCompletionService =  kernel.GetRequiredService<IChatCompletionService>();
 
-// Add a plugin
+// Add a plugin that provide additional functionality (e.g. tool calling, fetching data from external sources, etc.)
+// The LightsPlugin provides the agent the list of available bulbs and their state
+//  It also allows the agent to change the state of a light
+// To learn more about RAG: https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/using-data-retrieval-functions-for-rag
+// To learn more about task automation: https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/using-task-automation-functions
 kernel.Plugins.AddFromType<LightsPlugin>("Lights");
 
 // Enable planning
+// Semantic Kernel leverages the "native" function calling features of the API
+// To learn more: https://learn.microsoft.com/en-us/semantic-kernel/concepts/ai-services/chat-completion/function-calling/
+// This configuration tells SK to automatically invoke functions in the kernel
+// when the agent requests them (an alternative could be None, in which
+// case the functions won't be called automatically, allowing the user
+// to validate them first).
 OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
 {
     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
