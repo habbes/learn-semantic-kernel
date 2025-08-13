@@ -6,9 +6,11 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
-var modelId = "";
-var endpoint = "";
-var apiKey = "";
+DotNetEnv.Env.TraversePath().Load();
+
+var modelId = Environment.GetEnvironmentVariable("MODEL_ID") ?? "gpt-4.1";
+var endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new ArgumentNullException("AZURE_OPENAI_ENDPOINT required");
+var apiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY") ?? throw new ArgumentNullException("AZURE_OPENAI_API_KEY required");
 
 var builder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
 
