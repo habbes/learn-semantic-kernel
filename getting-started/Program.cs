@@ -21,6 +21,9 @@ builder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(Lo
 // Build the kernel
 Kernel kernel = builder.Build();
 
+// To learn more about the kernel:https://learn.microsoft.com/en-us/semantic-kernel/concepts/kernel
+// To learn more about semantic kernel components: https://learn.microsoft.com/en-us/semantic-kernel/concepts/semantic-kernel-components
+
 // Retrieve the chat completion service registerd above
 var chatCompletionService =  kernel.GetRequiredService<IChatCompletionService>();
 
